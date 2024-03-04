@@ -8,9 +8,9 @@ ssl_context.load_cert_chain(r"C:\Users\srish\localhost.crt", r"C:\Users\srish\lo
 
 # List of backend servers
 backend_servers = [("127.0.0.1", 8000), ("127.0.0.1", 8001),("127.0.0.1", 8002)]
-a=b=c=0
+stats=[0,0,0]
 def handle_client(client_socket, address):
-    global a,b,c
+    global stats
     print(f"Accepted connection from {address}")
 
     # Pick a backend server (for simplicity, round-robin strategy is used)
@@ -23,26 +23,27 @@ def handle_client(client_socket, address):
 
     # Forwarding data between client and backend server
     while True:
-        data_from_sever=backend_socket.recv(1024)
-        if not data_from_sever:
+        data_from_server=backend_socket.recv(1024)
+        if not data_from_server:
             break
-        client_socket.sendall(data_from_sever)
+        client_socket.sendall(data_from_server)
 
-        data_from_client = client_socket.recv(4096)
+        data_from_client = client_socket.recv(1024)
         if not data_from_client:
             break
         backend_socket.sendall(data_from_client)
-
+        if(data_from_client==b'1'):
+            stats[0]+=1
+        elif(data_from_client==b'2'):
+            stats[1]+=1
+        elif(data_from_client==b'3'):
+            stats[2]+=1
+        client_socket.sendall(f"{stats[0]},{stats[1]},{stats[2]}".encode())
     client_socket.close()
     backend_socket.close()
     print(f"Closed connection from {address}")
-    if(data_from_client==b'1'):
-        a=a+1
-    elif(data_from_client==b'2'):
-        b=b+1
-    elif(data_from_client==b'3'):
-        c=c+1
-    print("CURRENT STATS",a,b,c)
+    
+    #print("CURRENT STATS",a,b,c)
 
 
 def main():
