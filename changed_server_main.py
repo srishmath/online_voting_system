@@ -4,7 +4,7 @@ import threading
 
 # Generate SSL context
 ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-ssl_context.load_cert_chain(r"C:\Users\srish\localhost.crt", r"C:\Users\srish\localhost.key")
+ssl_context.load_cert_chain("localhost.crt", "localhost.key")
 
 # List of backend servers
 backend_servers = [("127.0.0.1", 8000), ("127.0.0.1", 8001),("127.0.0.1", 8002)]
@@ -38,11 +38,12 @@ def handle_client(client_socket, address):
             stats[1]+=1
         elif(data_from_client==b'3'):
             stats[2]+=1
-        client_socket.sendall(f"{stats[0]},{stats[1]},{stats[2]}".encode())
+        max_value=max(stats)
+        message = f"{max_value} is winning currently"
+        client_socket.sendall(message.encode())
     client_socket.close()
     backend_socket.close()
     print(f"Closed connection from {address}")
-    
     #print("CURRENT STATS",a,b,c)
 
 
